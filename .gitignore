@@ -1,0 +1,17 @@
+# 這個 repo 是要公開分享的 —— 金鑰與個人檔案一律不進版控。
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+
+# 執行產物（字幕與翻譯快取會落在媒體檔旁邊）
+*.srt
+*.srt-work/
+*.part.mp3
+
+# 任何本機設定與金鑰
+.env
+*.local.json
+config.toml
