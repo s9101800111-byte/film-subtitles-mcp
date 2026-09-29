@@ -19,35 +19,47 @@
 
 ## 需要什麼
 
-1. **ffmpeg / ffprobe**
+1. **uv**（用來下載並執行這支 server）
+   - Windows：`winget install astral-sh.uv`
+   - macOS：`brew install uv`
+   - 其他方式見 <https://docs.astral.sh/uv/getting-started/installation/>
+2. **ffmpeg / ffprobe**
    - Windows：`winget install Gyan.FFmpeg`
    - macOS：`brew install ffmpeg`
    - 裝完重開終端機。
-2. **Groq 金鑰**（免費）：到 <https://console.groq.com/keys> 申請，等一下填進設定檔。
+3. **Groq 金鑰**（免費）：到 <https://console.groq.com/keys> 申請，等一下填進設定檔。
 
 裝好之後可以先叫 `check_setup` 這支 tool 自我檢查。
 
 ## 安裝
 
-不用 clone，直接讓 `uvx` 跑（需要 [uv](https://docs.astral.sh/uv/)）。把下面這段加進你的 MCP 設定檔：
+不用 clone，直接讓 `uvx` 跑。
+
+**Claude Code**：在終端機跑一行（`-s user` 表示所有專案都能用）：
+
+```bash
+claude mcp add -s user film-subtitles -e GROQ_API_KEY=把你自己的金鑰貼在這裡 -- uvx --from git+https://github.com/s9101800111-byte/film-subtitles-mcp@v0.1.1 film-subtitles-mcp
+```
+
+跑完用 `claude mcp get film-subtitles` 確認顯示 Connected。
+
+**Claude Desktop**：把下面這段加進設定檔（Windows：`%APPDATA%\Claude\claude_desktop_config.json`；macOS：`~/Library/Application Support/Claude/claude_desktop_config.json`），存檔後**完全結束 Claude 再重開**：
 
 ```json
 {
   "mcpServers": {
     "film-subtitles": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/s9101800111-byte/film-subtitles-mcp@v0.1.0", "film-subtitles-mcp"],
+      "args": ["--from", "git+https://github.com/s9101800111-byte/film-subtitles-mcp@v0.1.1", "film-subtitles-mcp"],
       "env": { "GROQ_API_KEY": "把你自己的金鑰貼在這裡" }
     }
   }
 }
 ```
 
-> `@v0.1.0` 是版本標籤，**建議釘住**。不釘版本的話上游一更新就可能整支掛掉。
+> `@v0.1.1` 是版本標籤，**建議釘住**。不釘版本的話上游一更新就可能整支掛掉。
 
-設定檔位置：
-- Claude Desktop（Windows）：`%APPDATA%\Claude\claude_desktop_config.json`
-- Claude Code：專案或使用者層級的 `.mcp.json`
+> 剛裝完 uv 就設定的話，Claude 可能還找不到 `uvx`（連線失敗、`ENOENT`）。先完全結束 Claude 再重開；還是不行就把 `"command"` 改成 uvx 的完整路徑——在終端機跑 `where uvx`（Windows）或 `which uvx`（macOS）查，JSON 裡的反斜線要寫成 `\\`。
 
 要改程式碼就照一般方式 clone 下來：
 
@@ -86,7 +98,7 @@ uv run film-subtitles-mcp
 
 **想換翻譯模型？** `model` 參數可填任何 Groq 上的模型，例如 `qwen/qwen3.8-27b`。預設是 `openai/gpt-oss-120b`（指令遵循最穩，這條 pipeline 最吃這個）。
 
-**想用自己的 CLI agent 翻譯？** `translator` 填那支指令的名字（需支援 `-p <prompt> --model <model>`），例如 `agy`、`claude`。
+**想用自己的 CLI agent 翻譯？** `translator` 填那支指令的名字（需支援 `-p <prompt> --model <model>`），例如 `agy`、`claude`。**`model` 要一起指定該 CLI 認得的模型名**（例如 `claude` 配 `sonnet`），留空會帶入 agy 的預設模型而失敗。該 CLI 也要事先在本機登入好。
 
 ## 授權
 

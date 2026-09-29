@@ -390,7 +390,7 @@ def call_agent(prompt: str, translator: str, model: str) -> str:
         cmd += ["--print-timeout", "10m"]
     r = subprocess.run(cmd,
                        capture_output=True, text=True, encoding="utf-8", errors="replace",
-                       timeout=660)
+                       stdin=subprocess.DEVNULL, timeout=660)
     if r.returncode != 0:
         raise SubtitleError(f"{translator} 回傳錯誤碼 {r.returncode}：{(r.stderr or r.stdout)[:300]}")
     return r.stdout

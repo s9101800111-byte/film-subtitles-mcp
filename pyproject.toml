@@ -1,6 +1,6 @@
 [project]
 name = "film-subtitles-mcp"
-version = "0.1.0"
+version = "0.1.1"
 description = "把影片／音檔轉成逐字稿與繁體中文字幕的 MCP server（Groq Whisper + 可插拔翻譯後端）"
 readme = "README.md"
 requires-python = ">=3.10"
