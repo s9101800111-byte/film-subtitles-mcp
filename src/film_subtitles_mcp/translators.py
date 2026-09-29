@@ -35,7 +35,7 @@ def groq_chat(prompt: str, api_key: str, model: str = DEFAULT_GROQ_MODEL,
     }).encode("utf-8")
     headers = {"Authorization": f"Bearer {api_key}",
                "Content-Type": "application/json",
-               "User-Agent": "subtitle-mcp"}
+               "User-Agent": "film-subtitles-mcp"}
 
     for attempt in range(1, MAX_ATTEMPTS + 1):
         req = urllib.request.Request(GROQ_CHAT_URL, data=body, headers=headers, method="POST")

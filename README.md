@@ -1,4 +1,4 @@
-# subtitle-mcp
+# film-subtitles-mcp
 
 把**影片或音檔**轉成逐字稿與繁體中文字幕的 MCP server。
 
@@ -34,9 +34,9 @@
 ```json
 {
   "mcpServers": {
-    "subtitle": {
+    "film-subtitles": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/s9101800111-byte/subtitle-mcp@v0.1.0", "subtitle-mcp"],
+      "args": ["--from", "git+https://github.com/s9101800111-byte/film-subtitles-mcp@v0.1.0", "film-subtitles-mcp"],
       "env": { "GROQ_API_KEY": "把你自己的金鑰貼在這裡" }
     }
   }
@@ -52,10 +52,10 @@
 要改程式碼就照一般方式 clone 下來：
 
 ```bash
-git clone https://github.com/s9101800111-byte/subtitle-mcp
-cd subtitle-mcp
+git clone https://github.com/s9101800111-byte/film-subtitles-mcp
+cd film-subtitles-mcp
 uv sync
-uv run subtitle-mcp
+uv run film-subtitles-mcp
 ```
 
 ## 工具

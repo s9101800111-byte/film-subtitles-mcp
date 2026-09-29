@@ -1,4 +1,4 @@
-"""subtitle-mcp：影片／音檔轉逐字稿與繁體中文字幕的 MCP server。
+"""film-subtitles-mcp：影片／音檔轉逐字稿與繁體中文字幕的 MCP server。
 
 轉字幕是長時間工作（一小時影片約數分鐘），所以拆成 start / status 兩段：
 start 立刻回 job_id，實際工作在背景跑，用 status 查進度。
@@ -14,7 +14,7 @@ from mcp.server.fastmcp import FastMCP
 from . import jobs
 from .translators import DEFAULT_GROQ_MODEL
 
-mcp = FastMCP("subtitle-mcp")
+mcp = FastMCP("film-subtitles-mcp")
 
 
 def _groq_key() -> str:

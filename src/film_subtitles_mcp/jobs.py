@@ -1,6 +1,6 @@
 """背景 job：轉字幕動輒好幾分鐘，MCP 呼叫不能站在那裡等。
 
-一支 job 一個資料夾（~/.subtitle-mcp/jobs/<id>/），裡面是 state.json 與 log.txt。
+一支 job 一個資料夾（~/.film-subtitles-mcp/jobs/<id>/），裡面是 state.json 與 log.txt。
 狀態寫在檔案裡而不是只存在記憶體，server 重啟後還查得到上次跑到哪。
 """
 
@@ -16,7 +16,7 @@ from pathlib import Path
 from . import subtitle
 from .translators import DEFAULT_GROQ_MODEL, make_agent
 
-JOBS_DIR = Path.home() / ".subtitle-mcp" / "jobs"
+JOBS_DIR = Path.home() / ".film-subtitles-mcp" / "jobs"
 
 
 def _now() -> str:

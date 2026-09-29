@@ -347,7 +347,7 @@ def groq_transcribe(audio: Path, api_key: str, language: str = "en",
     body += audio.read_bytes() + f"\r\n--{boundary}--\r\n".encode()
     headers = {"Authorization": f"Bearer {api_key}",
                "Content-Type": f"multipart/form-data; boundary={boundary}",
-               "User-Agent": "subtitle-mcp"}
+               "User-Agent": "film-subtitles-mcp"}
     for attempt in range(1, 7):
         req = urllib.request.Request(GROQ_URL, data=body, headers=headers, method="POST")
         try:
@@ -566,4 +566,4 @@ def resolve_groq_key(explicit: str | None) -> str:
 
 
 if __name__ == "__main__":  # pragma: no cover
-    sys.exit("這是函式庫模組，請用 subtitle-mcp 的 MCP server 或 CLI 呼叫")
+    sys.exit("這是函式庫模組，請用 film-subtitles-mcp 的 MCP server 或 CLI 呼叫")
