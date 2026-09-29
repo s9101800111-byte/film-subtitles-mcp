@@ -17,7 +17,6 @@ from . import subtitle
 from .translators import DEFAULT_GROQ_MODEL, make_agent
 
 JOBS_DIR = Path.home() / ".subtitle-mcp" / "jobs"
-SRT_SUFFIXES = (".en.srt", ".zh.srt", ".zh-TW.srt")
 
 
 def _now() -> str:
@@ -72,19 +71,6 @@ def tail_log(job_id: str, lines: int = 30) -> str:
     return "\n".join(text[-lines:])
 
 
-def outputs_for(paths: list[str]) -> list[str]:
-    """掃出已經產生的字幕檔（run() 本身不回傳路徑）。"""
-    found: list[str] = []
-    for p in map(Path, paths):
-        targets = [f for f in p.iterdir()] if p.is_dir() else [p]
-        for t in targets:
-            for suf in SRT_SUFFIXES:
-                srt = t.with_name(t.stem + suf)
-                if srt.exists() and str(srt) not in found:
-                    found.append(str(srt))
-    return found
-
-
 def start(paths: list[str], *, groq_key: str, language: str = "en", translate: bool = True,
           translator: str = "groq", model: str | None = None, context: str = "",
           force: bool = False) -> str:
@@ -111,14 +97,13 @@ def start(paths: list[str], *, groq_key: str, language: str = "en", translate: b
                 context=context, language=language, translate=translate, force=force,
                 agent=make_agent(translator, groq_key, log) if translate else None,
             )
-            rc = subtitle.run(paths, opts, log)
+            rc, outputs = subtitle.run(paths, opts, log)
             _write_state(job_id, status="done" if rc == 0 else "partial",
-                         finished_at=_now(), outputs=outputs_for(paths))
+                         finished_at=_now(), outputs=outputs)
         except Exception as exc:  # 背景執行緒吞掉例外等於靜默失敗，一律寫進狀態
             log(f"FAILED: {exc}")
             log(traceback.format_exc())
-            _write_state(job_id, status="failed", finished_at=_now(), error=str(exc),
-                         outputs=outputs_for(paths))
+            _write_state(job_id, status="failed", finished_at=_now(), error=str(exc), outputs=[])
 
     threading.Thread(target=work, daemon=True, name=f"subtitle-{job_id}").start()
     return job_id

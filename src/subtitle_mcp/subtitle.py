@@ -287,7 +287,7 @@ def media_duration(video: Path) -> float:
     ffprobe = _need("ffprobe", "請先安裝 ffmpeg（Windows：winget install Gyan.FFmpeg，裝完重開終端機）")
     r = subprocess.run([ffprobe, "-v", "error", "-show_entries", "format=duration",
                         "-of", "default=nw=1:nk=1", str(video)],
-                       capture_output=True, text=True)
+                       capture_output=True, text=True, stdin=subprocess.DEVNULL, timeout=60)
     try:
         return float(r.stdout.strip())
     except ValueError as exc:
@@ -297,9 +297,12 @@ def media_duration(video: Path) -> float:
 def extract_chunk(video: Path, start: float, out: Path) -> None:
     ffmpeg = _need("ffmpeg", "請先安裝 ffmpeg（Windows：winget install Gyan.FFmpeg，裝完重開終端機）")
     tmp = out.with_suffix(".part.mp3")
-    r = subprocess.run([ffmpeg, "-y", "-v", "error", "-ss", f"{start}", "-t", f"{CHUNK_SECONDS}",
-                        "-i", str(video), "-vn", "-ac", "1", "-ar", "16000", "-b:a", "48k", str(tmp)],
-                       capture_output=True, text=True)
+    try:
+        r = subprocess.run([ffmpeg, "-y", "-v", "error", "-nostdin", "-ss", f"{start}", "-t", f"{CHUNK_SECONDS}",
+                            "-i", str(video), "-vn", "-ac", "1", "-ar", "16000", "-b:a", "48k", str(tmp)],
+                           capture_output=True, text=True, stdin=subprocess.DEVNULL, timeout=300)
+    except subprocess.TimeoutExpired as exc:
+        raise SubtitleError("ffmpeg 切音軌超過 5 分鐘沒回應，稍後重跑同一個指令即可從中斷處接續") from exc
     if r.returncode != 0 or not tmp.exists():
         raise SubtitleError(f"ffmpeg 切音軌失敗：{r.stderr.strip()[:300]}")
     tmp.replace(out)
@@ -530,22 +533,25 @@ def translate_srt(video: Path, en_srt: Path, opts: SrtOptions,
     return zh_srt
 
 
-def run(paths: list[str], opts: SrtOptions, log: Callable[[str], None] = print) -> int:
+def run(paths: list[str], opts: SrtOptions, log: Callable[[str], None] = print) -> tuple[int, list[str]]:
     videos = find_videos(paths)
     if not videos:
         raise SubtitleError("資料夾裡沒有可處理的媒體檔（支援 " + "、".join(sorted(MEDIA_EXTS)) + "）")
     failed = 0
+    outputs: list[str] = []
     for n, video in enumerate(videos, 1):
         log(f"\n[{n}/{len(videos)}] {video.name}")
         try:
             en_srt = transcribe_video(video, opts, log)
+            outputs.append(str(en_srt))
             if opts.translate:
-                translate_srt(video, en_srt, opts, log)
+                zh_srt = translate_srt(video, en_srt, opts, log)
+                outputs.append(str(zh_srt))
         except SubtitleError as exc:
             failed += 1
             log(f"  ✗ {exc}")
     log(f"\n完成 {len(videos) - failed}/{len(videos)} 部" + ("" if not failed else "；失敗的直接重跑同一個指令會從中斷處接續"))
-    return 1 if failed else 0
+    return (1 if failed else 0), outputs
 
 
 def resolve_groq_key(explicit: str | None) -> str:
